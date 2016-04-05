@@ -7,8 +7,11 @@ var day 			= 0.0;
 var year			= 0.0;
 var month			= 0.0;
 var clock;
+//var uniforms = {};
 
-var fs = 0.1;
+
+//var fs = 0.1;
+var ssb = 0.3;
       // float fh = 0.26;
       // float bs = 0.09;
       // float bb = 0.19;
@@ -39,8 +42,8 @@ function init() {
 	var ambientLight = new THREE.AmbientLight(new THREE.Color(1.0, 1.0, 1.0));
 	scene.add(ambientLight);
 
+	//initGUI();
 	loadMeshes();
-	initGUI();
 	renderer.clear();
 }
 
@@ -50,46 +53,31 @@ function loadMeshes() {
 	loader.load('../Models/Earth.obj', buildScene);		
 }
 
-function initGUI() {
+// function initGUI() {
 
-	controls = new function () {
-		this.fs = fs;
-		//this.intensity 		= directionalLight.intensity;
-		// this.lightPosX      = directionalLight.position.x;
-		// this.lightPosY 		= directionalLight.position.y;
-		// this.lightPosZ 		= directionalLight.position.z;
-		// this.lightColor		= directionalLight.color;
-		};
+// 	controls = new function () {
+// 		//this.fs = fs;
+// 		this.ssb = ssb;
+// 		//this.intensity 		= directionalLight.intensity;
+// 		// this.lightPosX      = directionalLight.position.x;
+// 		// this.lightPosY 		= directionalLight.position.y;
+// 		// this.lightPosZ 		= directionalLight.position.z;
+// 		// this.lightColor		= directionalLight.color;
+// 		};
 
-	var gui = new dat.GUI();
+// 	var gui = new dat.GUI();
 
-	gui.add(controls, 'fs', 0.0, 1.0).onChange(function (value) {
-		fs = controls.fs;
-		//directionalLight.distance = controls.distance;
-	}
-	);
+// 	// gui.add(controls, 'fs', 0.0, 1.0).onChange(function (value) {
+// 	// 	fs = controls.fs;
+// 	// });
 
-	// gui.add(controls, 'intensity', 0.0, 10.0).onChange(function (value) {
-	// 	//directionalLight.intensity = controls.intensity;
-	// 	});
-	// gui.addColor(controls, 'lightColor').onChange(function (value) {
-	// 	directionalLight.color = new THREE.Color(controls.lightColor);
-	// 	sphereLightMesh.material.color = new THREE.Color(value);
-	// 	});
+// 	gui.add(controls, 'ssb', 0.0, 1.0).onChange(function (value) {
+// 		uniforms.ssb = { type: "float", value:ssb};
+// 		//ssb = controls.ssb;
+// 	});
+
 	
-	// var fLightPos = gui.addFolder('LightPos');
-	// fLightPos.add( controls, 'lightPosX', -1.0, 1.0).onChange(function (value) {
-	// 	directionalLight.position.x = sphereLightMesh.position.x = controls.lightPosX;
-	// 	});
-	// fLightPos.add( controls, 'lightPosY', -1.0, 1.0).onChange(function (value) {
-	// 	directionalLight.position.y = sphereLightMesh.position.y = controls.lightPosY;
-	// 	});
-	// fLightPos.add( controls, 'lightPosZ', -1.0, 1.0).onChange(function (value) {
-	// 	directionalLight.position.z = sphereLightMesh.position.z = controls.lightPosZ;
-	// 	});
-	// fLightPos.close();
-	
-};
+// }
 
 function render() {
 	var delta = clock.getDelta();
@@ -153,7 +141,6 @@ function buildScene(loadedMesh) {
 	uniforms = {
 		uCamPos	: 	{ type: "v3", value:camera.position},
 		uLPos	:	{ type: "v3", value:pointLight.position},
-		fs : { type: "float", value:fs} 
 		};
 	
 	var matShader = new THREE.ShaderMaterial( {

@@ -1,11 +1,15 @@
 var scene 			= null;
 var renderer		= null;
 var camera 			= null;
+var pointLight		= null;
 var orbitControls	= null;
 var day 			= 0.0;
 var year			= 0.0;
 var month			= 0.0;
 var clock;
+
+//Uniform Values
+var ssb = 0.0;
 
 function init() {
 
@@ -20,21 +24,24 @@ function init() {
 
 	document.getElementById("WebGL-output").appendChild(renderer.domElement);
 
-	camera = new THREE.PerspectiveCamera(60.0, 1.0, 0.1, 300.0);
+	camera = new THREE.PerspectiveCamera(60.0, 1.0, 0.1, 1000.0);
 	
 	// Controle de Camera Orbital
 	orbitControls = new THREE.OrbitControls(camera);
 	orbitControls.autoRotate = false;
 
-	loadMesh();
-		
+	// Adiciona luz ambiente
+	var ambientLight = new THREE.AmbientLight(new THREE.Color(1.0, 1.0, 1.0));
+	scene.add(ambientLight);
+	initGUI();
+	loadMeshes();
 	renderer.clear();
 }
 
-function loadMesh() {
+function loadMeshes() {
 	// Load Mesh
 	var loader = new THREE.OBJLoader();
-	loader.load('../../Assets/Models/mario.obj', buildScene);		
+	loader.load('../Models/Earth.obj', buildScene);		
 }
 
 function render() {
@@ -45,23 +52,50 @@ function render() {
 	requestAnimationFrame(render);
 }
 
-function buildScene(loadedMesh) {
-	var material 		= new THREE.MeshBasicMaterial();
-	material.color 		= new THREE.Color(0.5, 0.5, 1.0);
-	material.shading	= THREE.FlatShading;
 
-	loadedMesh.children.forEach(function (child) {
-		child.geometry.computeFaceNormals();
-		child.geometry.computeVertexNormals();
-		child.geometry.normalsNeedUpdate = true;
-		child.material = material;
+function initGUI() {
+
+	controls = new function () {
+		this.ssb 		= ssb;
+		// this.intensity 		= directionalLight.intensity;
+		// this.lightPosX      = directionalLight.position.x;
+		// this.lightPosY 		= directionalLight.position.y;
+		// this.lightPosZ 		= directionalLight.position.z;
+		// this.lightColor		= directionalLight.color;
+	}
+
+	var gui = new dat.GUI();
+
+	gui.add(controls, 'ssb', 0.0, 1.0).onChange(function (value) {
+		ssb = controls.ssb;
+		console.log(ssb);
 		});
+	// gui.add(controls, 'intensity', 0.0, 10.0).onChange(function (value) {
+	// 	directionalLight.intensity = controls.intensity;
+	// 	});
+	// gui.addColor(controls, 'lightColor').onChange(function (value) {
+	// 	directionalLight.color = new THREE.Color(controls.lightColor);
+	// 	sphereLightMesh.material.color = new THREE.Color(value);
+	// 	});
+	
+	// var fLightPos = gui.addFolder('LightPos');
+	// fLightPos.add( controls, 'lightPosX', -1.0, 1.0).onChange(function (value) {
+	// 	directionalLight.position.x = sphereLightMesh.position.x = controls.lightPosX;
+	// 	});
+	// fLightPos.add( controls, 'lightPosY', -1.0, 1.0).onChange(function (value) {
+	// 	directionalLight.position.y = sphereLightMesh.position.y = controls.lightPosY;
+	// 	});
+	// fLightPos.add( controls, 'lightPosZ', -1.0, 1.0).onChange(function (value) {
+	// 	directionalLight.position.z = sphereLightMesh.position.z = controls.lightPosZ;
+	// 	});
+	// fLightPos.close();
+	
+}
 
-	mesh = loadedMesh;
-	scene.add(mesh);
+function buildScene(loadedMesh) {              
 
 	// Bounding Box	
-	var BBox = new THREE.BoundingBoxHelper(mesh, 0xffffff);
+	var BBox = new THREE.BoundingBoxHelper(loadedMesh, 0xffffff);
 	BBox.update();
 	
 	// Adjust Camera Position and LookAt	
@@ -96,10 +130,10 @@ function buildScene(loadedMesh) {
 	scene.add(groundMesh);
 	
 	//Add point light Source
-	var pointLight1 = new THREE.PointLight(new THREE.Color(1.0, 1.0, 1.0));
-	pointLight1.distance = 1000.0;
-	pointLight1.position.set(BBox.box.max.x*1.2, BBox.box.max.y*1.2, BBox.box.max.z*1.2);
-	scene.add(pointLight1);
+	pointLight = new THREE.PointLight(new THREE.Color(1.0, 1.0, 1.0));
+	pointLight.distance = 0.0;
+	pointLight.position.set(BBox.box.max.x*1.2, BBox.box.max.y*1.2, BBox.box.max.z*1.2);
+	scene.add(pointLight);
 	
 	// Fonte de luz 1 - representacao geometrica
 	var sphereLight = new THREE.SphereGeometry(maxCoord*0.02);
@@ -108,21 +142,31 @@ function buildScene(loadedMesh) {
 
 	sphereLightMesh.position.set(BBox.box.max.x*1.2, BBox.box.max.y*1.2, BBox.box.max.z*1.2);
 	scene.add(sphereLightMesh);
-
-	//Add another point light Source
-	var pointLight2 = new THREE.PointLight(new THREE.Color(1.0, 1.0, 1.0));
-	pointLight2.distance = 1000.0;
-	pointLight2.position.set(BBox.box.min.x*1.2, BBox.box.min.y*1.2, BBox.box.min.z*1.2);
-	scene.add(pointLight2);
-
-	// Fonte de luz 2 - representacao geometrica
-	var sphereLight = new THREE.SphereGeometry(maxCoord*0.02);
-	var sphereLightMaterial = new THREE.MeshBasicMaterial(new THREE.Color(1.0, 1.0, 1.0));
-	var sphereLightMesh = new THREE.Mesh(sphereLight, sphereLightMaterial);
-
-	sphereLightMesh.position.set(BBox.box.min.x*1.2, BBox.box.min.y*1.2, BBox.box.min.z*1.2);
-	scene.add(sphereLightMesh);
 	
+	uniforms = {
+		uCamPos	: 	{ type: "v3", value:camera.position},
+		uLPos	:	{ type: "v3", value:pointLight.position} 
+		};
+	
+	var matShader = new THREE.ShaderMaterial( {
+			uniforms: uniforms,
+			vertexShader: document.getElementById( 'phong-vs' ).textContent,
+			fragmentShader: document.getElementById( 'phong-fs' ).textContent
+			} );
+	
+	
+	loadedMesh.traverse(function (child) {	
+		if (child instanceof THREE.Mesh) {
+			child.material = matShader;
+			if ( (child.geometry.attributes.normal != undefined) && (child.geometry.attributes.normal.length == 0)) {
+				console.log(child.geometry.attributes.normal.length);
+				child.geometry.computeFaceNormals();
+				child.geometry.computeVertexNormals();
+				child.geometry.normalsNeedUpdate = true;
+				}
+			}
+		});
+	
+	scene.add(loadedMesh);
 	render();
 }
-
